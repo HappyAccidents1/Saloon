@@ -34,7 +34,7 @@ input[type="number"]{width:100px;text-align:center}
 .page{display:none}
 .page.active{display:block}
 .employee-wrap{max-width:1200px;margin:0 auto}
-.employee-grid{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:24px}
+.employee-grid{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:24px}
 hr{border:1px solid #6a4a2a;margin:20px 0}
 .status-ok{color:#8ed081}
 .status-bad{color:#ff9b8a}
@@ -160,6 +160,12 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
         <table id="summaryTable"></table>
         <button onclick="resetSales()" class="dangerbtn" style="margin-top:12px;">Alle Umsätze löschen</button>
         <div class="notice">Löscht alle Buchungen in der Datenbank und setzt Umsatz/Gewinn auf 0.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Umsatz pro Mitarbeiter</h2>
+        <table id="employeeSalesTable"></table>
+        <div class="notice">Hier siehst du, welcher Mitarbeiter wie viel Umsatz und Gewinn gemacht hat.</div>
       </div>
 
       <div class="panel">
@@ -750,6 +756,60 @@ function renderUsers(){
   updateActiveUserBadge();
 }
 
+
+function renderEmployeeSales(){
+  const table = byId("employeeSalesTable");
+  if (!table) return;
+
+  const byEmployee = {};
+
+  employees.forEach(emp => {
+    byEmployee[emp.id] = {
+      name: emp.name,
+      sales: 0,
+      profit: 0,
+      bookings: 0
+    };
+  });
+
+  sales.forEach(sale => {
+    const key = sale.employee_id || sale.employee_name || "unknown";
+    if (!byEmployee[key]) {
+      byEmployee[key] = {
+        name: sale.employee_name || "Unbekannt",
+        sales: 0,
+        profit: 0,
+        bookings: 0
+      };
+    }
+    byEmployee[key].sales += Number(sale.sale_price) * Number(sale.qty);
+    byEmployee[key].profit += (Number(sale.sale_price) - Number(sale.cost_price)) * Number(sale.qty);
+    byEmployee[key].bookings += 1;
+  });
+
+  table.innerHTML = `
+    <tr>
+      <th>Mitarbeiter</th>
+      <th>Umsatz</th>
+      <th>Gewinn</th>
+      <th>Buchungen</th>
+    </tr>
+  `;
+
+  Object.values(byEmployee)
+    .sort((a, b) => b.sales - a.sales)
+    .forEach(entry => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${entry.name}</td>
+        <td>$${money(entry.sales)}</td>
+        <td>$${money(entry.profit)}</td>
+        <td>${entry.bookings}</td>
+      `;
+      table.appendChild(row);
+    });
+}
+
 function renderSummary(){
   const totalSales = sales.reduce((sum, s) => sum + Number(s.sale_price) * Number(s.qty), 0);
   const totalProfit = sales.reduce((sum, s) => sum + (Number(s.sale_price) - Number(s.cost_price)) * Number(s.qty), 0);
@@ -796,6 +856,7 @@ function render(){
   renderCart();
   renderUsers();
   renderSummary();
+  renderEmployeeSales();
   renderEditProducts();
   fillCategorySelectors();
   updateActiveUserBadge();
