@@ -156,16 +156,10 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
       </div>
 
       <div class="panel">
-        <h2>Gesamt Umsatz & Gewinn</h2>
-        <table id="summaryTable"></table>
+        <h2>Umsatz Übersicht</h2>
+        <table id="salesOverviewTable"></table>
         <button onclick="resetSales()" class="dangerbtn" style="margin-top:12px;">Alle Umsätze löschen</button>
-        <div class="notice">Löscht alle Buchungen in der Datenbank und setzt Umsatz/Gewinn auf 0.</div>
-      </div>
-
-      <div class="panel">
-        <h2>Umsatz pro Mitarbeiter</h2>
-        <table id="employeeSalesTable"></table>
-        <div class="notice">Hier siehst du, welcher Mitarbeiter wie viel Umsatz und Gewinn gemacht hat.</div>
+        <div class="notice">Gesamtumsatz und Umsatz pro Mitarbeiter.</div>
       </div>
 
       <div class="panel">
@@ -810,6 +804,74 @@ function renderEmployeeSales(){
     });
 }
 
+
+function renderSalesOverview(){
+  const table = byId("salesOverviewTable");
+  if (!table) return;
+
+  const byEmployee = {};
+
+  employees.forEach(emp => {
+    byEmployee[emp.id] = {
+      name: emp.name,
+      sales: 0,
+      profit: 0,
+      bookings: 0
+    };
+  });
+
+  sales.forEach(sale => {
+    const key = sale.employee_id || sale.employee_name || "unknown";
+    if (!byEmployee[key]) {
+      byEmployee[key] = {
+        name: sale.employee_name || "Unbekannt",
+        sales: 0,
+        profit: 0,
+        bookings: 0
+      };
+    }
+
+    byEmployee[key].sales += Number(sale.sale_price) * Number(sale.qty);
+    byEmployee[key].profit += (Number(sale.sale_price) - Number(sale.cost_price)) * Number(sale.qty);
+    byEmployee[key].bookings += 1;
+  });
+
+  const totalSales = Object.values(byEmployee).reduce((s,e)=>s+e.sales,0);
+  const totalProfit = Object.values(byEmployee).reduce((s,e)=>s+e.profit,0);
+
+  table.innerHTML = `
+    <tr>
+      <th>Mitarbeiter</th>
+      <th>Umsatz</th>
+      <th>Gewinn</th>
+      <th>Buchungen</th>
+    </tr>
+  `;
+
+  Object.values(byEmployee)
+    .sort((a,b)=>b.sales-a.sales)
+    .forEach(entry=>{
+      const row=document.createElement("tr");
+      row.innerHTML=`
+        <td>${entry.name}</td>
+        <td>$${money(entry.sales)}</td>
+        <td>$${money(entry.profit)}</td>
+        <td>${entry.bookings}</td>
+      `;
+      table.appendChild(row);
+    });
+
+  const totalRow=document.createElement("tr");
+  totalRow.style.fontWeight="bold";
+  totalRow.innerHTML=`
+    <td>GESAMT</td>
+    <td>$${money(totalSales)}</td>
+    <td>$${money(totalProfit)}</td>
+    <td>-</td>
+  `;
+  table.appendChild(totalRow);
+}
+
 function renderSummary(){
   const totalSales = sales.reduce((sum, s) => sum + Number(s.sale_price) * Number(s.qty), 0);
   const totalProfit = sales.reduce((sum, s) => sum + (Number(s.sale_price) - Number(s.cost_price)) * Number(s.qty), 0);
@@ -855,8 +917,7 @@ function render(){
   renderStock();
   renderCart();
   renderUsers();
-  renderSummary();
-  renderEmployeeSales();
+  renderSalesOverview();
   renderEditProducts();
   fillCategorySelectors();
   updateActiveUserBadge();
