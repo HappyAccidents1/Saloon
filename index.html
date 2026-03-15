@@ -34,7 +34,7 @@ input[type="number"]{width:100px;text-align:center}
 .page{display:none}
 .page.active{display:block}
 .employee-wrap{max-width:1200px;margin:0 auto}
-.employee-grid{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:24px}
+.employee-grid{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:24px}
 hr{border:1px solid #6a4a2a;margin:20px 0}
 .status-ok{color:#8ed081}
 .status-bad{color:#ff9b8a}
@@ -43,10 +43,13 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
 @media (max-width:760px){.container{grid-template-columns:1fr}}
 
 .bank-display{
-font-size:32px;
-color:#2ecc71;
-font-weight:bold;
-margin:10px 0;
+  font-size:32px;
+  color:#2ecc71;
+  font-weight:bold;
+  margin:10px 0 14px 0;
+}
+.bank-label{
+  margin:0 0 4px 0;
 }
 
 </style>
@@ -84,12 +87,8 @@ margin:10px 0;
 
     <div class="panel">
       <h2>Gesamte Kasse</h2>
-      <p>Aktuelles Saloon Geld</p>
-
-      <div class="bank-display">
-      $ <span id="bankDisplay">0.00</span>
-      </div>
-
+      <p class="bank-label">Aktuelles Saloon Geld</p>
+      <div class="bank-display">$ <span id="bankDisplay">0.00</span></div>
       <input type="number" id="bank" onchange="saveBank()">
       <p style="margin-top:15px;">Session zur Kasse addieren</p>
       <button onclick="addSessionToBank()">Umsatz übertragen</button>
@@ -145,6 +144,25 @@ margin:10px 0;
 
         <button class="dangerbtn" onclick="resetBankTotal()">Kassenstand auf 0 setzen</button>
         <div class="notice" id="adminNotice"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Datenbank verwalten</h2>
+
+        <p style="margin:8px 0 4px;">Bereich</p>
+        <select id="deleteTypeSelect" class="full" onchange="renderDeleteOptions()">
+          <option value="products">Artikel</option>
+          <option value="employees">Mitarbeiter</option>
+          <option value="sales">Verkäufe</option>
+          <option value="categories">Kategorien</option>
+        </select>
+
+        <p style="margin:12px 0 4px;">Eintrag auswählen</p>
+        <select id="deleteItemSelect" class="full"></select>
+
+        <button class="dangerbtn" onclick="deleteSelectedRecord()" style="margin-top:12px;">Ausgewählten Eintrag löschen</button>
+
+        <div class="notice" id="deleteNotice"></div>
       </div>
 
       <div class="panel">
@@ -237,6 +255,7 @@ function showProductNotice(msg){ byId("productNotice").textContent = msg || ""; 
 function showUserNotice(msg){ byId("userNotice").textContent = msg || ""; }
 function showAdminNotice(msg){ const el = byId("adminNotice"); if (el) el.textContent = msg || ""; }
 function showSalesNotice(msg){ const el = byId("salesNotice"); if (el) el.textContent = msg || ""; }
+function showDeleteNotice(msg){ const el = byId("deleteNotice"); if (el) el.textContent = msg || ""; }
 
 function getActiveEmployee(){
   return employees.find(e => e.id === activeEmployeeId) || null;
@@ -384,9 +403,114 @@ async function resetBankTotal(){
   bank = 0;
   await upsertSetting("bank_total", { amount: 0 });
   byId("bank").value = 0;
+  const bd = byId("bankDisplay"); if (bd) bd.textContent = money(0);
   showAdminNotice("Kassenstand wurde auf 0 gesetzt.");
 }
 window.resetBankTotal = resetBankTotal;
+
+
+function renderDeleteOptions(){
+  const type = byId("deleteTypeSelect")?.value;
+  const select = byId("deleteItemSelect");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  const addOption = (value, label) => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = label;
+    select.appendChild(opt);
+  };
+
+  if (type === "products") {
+    products.forEach(item => addOption(item.id, item.name));
+  } else if (type === "employees") {
+    employees.forEach(item => addOption(item.id, item.name));
+  } else if (type === "sales") {
+    sales.slice().sort((a,b)=> new Date(b.created_at)-new Date(a.created_at)).forEach(item => {
+      const label = `${item.product_name} | ${item.employee_name || "Unbekannt"} | ${item.qty}x | ${new Date(item.created_at).toLocaleString("de-DE")}`;
+      addOption(item.id, label);
+    });
+  } else if (type === "categories") {
+    const cats = Object.keys(getCategoryStructure()).sort();
+    cats.forEach(cat => addOption(cat, cat));
+  }
+
+  if (!select.options.length) {
+    addOption("", "Keine Einträge vorhanden");
+  }
+}
+window.renderDeleteOptions = renderDeleteOptions;
+
+async function deleteSelectedRecord(){
+  const type = byId("deleteTypeSelect")?.value;
+  const value = byId("deleteItemSelect")?.value;
+
+  if (!value) return showDeleteNotice("Bitte zuerst einen Eintrag auswählen.");
+
+  if (type === "products") {
+    const product = products.find(p => p.id === value);
+    if (!product) return showDeleteNotice("Artikel nicht gefunden.");
+    if (!confirm(`Artikel '${product.name}' wirklich löschen?`)) return;
+
+    const hasSales = sales.some(s => s.product_id === value);
+    let error;
+    if (hasSales) {
+      ({ error } = await supabase.from("products").update({ active: false }).eq("id", value));
+    } else {
+      ({ error } = await supabase.from("products").delete().eq("id", value));
+    }
+    if (error) return showDeleteNotice(error.message);
+    await loadAllData();
+    renderDeleteOptions();
+    return showDeleteNotice("Artikel gelöscht.");
+  }
+
+  if (type === "employees") {
+    const employee = employees.find(e => e.id === value);
+    if (!employee) return showDeleteNotice("Mitarbeiter nicht gefunden.");
+    if (!confirm(`Mitarbeiter '${employee.name}' wirklich löschen?`)) return;
+
+    const { error } = await supabase.from("employees").update({ active: false }).eq("id", value);
+    if (error) return showDeleteNotice(error.message);
+
+    if (activeEmployeeId === value) {
+      activeEmployeeId = null;
+      await upsertSetting("active_employee_id", { id: null });
+    }
+
+    await loadAllData();
+    renderDeleteOptions();
+    return showDeleteNotice("Mitarbeiter gelöscht.");
+  }
+
+  if (type === "sales") {
+    const sale = sales.find(s => s.id === value);
+    if (!sale) return showDeleteNotice("Verkauf nicht gefunden.");
+    if (!confirm(`Verkauf '${sale.product_name}' wirklich löschen?`)) return;
+
+    const { error } = await supabase.from("sales").delete().eq("id", value);
+    if (error) return showDeleteNotice(error.message);
+
+    await loadAllData();
+    renderDeleteOptions();
+    return showDeleteNotice("Verkauf gelöscht.");
+  }
+
+  if (type === "categories") {
+    const category = value;
+    if (!confirm(`Kategorie '${category}' wirklich löschen? Artikel dieser Kategorie bleiben bestehen.`)) return;
+
+    customCategories = customCategories.filter(entry => (entry.category || "").trim() !== category);
+    await saveCustomCategories();
+    await loadAllData();
+    renderDeleteOptions();
+    fillCategorySelectors();
+    return showDeleteNotice("Kategorie aus der Verwaltungsliste gelöscht.");
+  }
+}
+window.deleteSelectedRecord = deleteSelectedRecord;
 
 async function loadAllData(){
   const [
@@ -417,7 +541,7 @@ async function loadAllData(){
   customCategories = Array.isArray(settings.custom_categories?.items) ? settings.custom_categories.items : [];
 
   byId("bank").value = bank;
-  const bd = byId("bankDisplay"); if(bd) bd.textContent = money(bank);
+  const bd = byId("bankDisplay"); if (bd) bd.textContent = money(bank);
   render();
 }
 window.loadAllData = loadAllData;
@@ -432,7 +556,7 @@ async function upsertSetting(key, value){
 async function saveBank(){
   try {
     bank = Number(byId("bank").value || 0);
-    const bd = byId("bankDisplay"); if(bd) bd.textContent = money(bank);
+    const bd = byId("bankDisplay"); if (bd) bd.textContent = money(bank);
     await upsertSetting("bank_total", { amount: bank });
     showNotice("Kassenstand gespeichert.");
   } catch (e) {
@@ -596,6 +720,7 @@ async function addSessionToBank(){
 
   const total = entries.reduce((sum, e) => sum + e.qty * e.sale_price, 0);
   bank += total;
+  const bd = byId("bankDisplay"); if (bd) bd.textContent = money(bank);
   await upsertSetting("bank_total", { amount: bank });
 
   cart = {};
@@ -935,6 +1060,7 @@ function render(){
   renderSalesOverview();
   renderEditProducts();
   fillCategorySelectors();
+  renderDeleteOptions();
   updateActiveUserBadge();
 }
 
