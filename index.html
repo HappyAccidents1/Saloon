@@ -111,6 +111,29 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
 <div id="employeePage" class="page">
   <div class="employee-wrap">
     <div class="employee-grid">
+<div class="panel">
+        <h2>Verwaltung</h2>
+
+        <button class="secondarybtn" onclick="testConnection()">Datenbank testen</button>
+        <button class="secondarybtn" onclick="loadAllData()">Jetzt aktualisieren</button>
+
+        <hr>
+
+        <p style="margin:8px 0 4px;">Neue Kategorie</p>
+        <input id="newCategoryName" class="full" type="text" placeholder="z. B. Snacks" style="text-align:left;">
+        <button onclick="addCategory()">Kategorie hinzufügen</button>
+
+        <p style="margin:12px 0 4px;">Neue Unterkategorie</p>
+        <select id="adminCategorySelect" class="full"></select>
+        <input id="newSubcategoryName" class="full" type="text" placeholder="z. B. Wein" style="text-align:left;margin-top:8px;">
+        <button onclick="addSubcategory()">Unterkategorie hinzufügen</button>
+
+        <hr>
+
+        <button class="dangerbtn" onclick="resetBankTotal()">Kassenstand auf 0 setzen</button>
+        <div class="notice" id="adminNotice"></div>
+      </div>
+
       <div class="panel">
         <h2>Mitarbeiter Login</h2>
         <p style="margin:8px 0 4px;">Neuen Mitarbeiter anlegen</p>
@@ -145,28 +168,7 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
         <div class="notice">Name, Verkauf und Einkauf ändern und mit einem Klick speichern.</div>
       </div>
     
-      <div class="panel">
-        <h2>Verwaltung</h2>
-
-        <button class="secondarybtn" onclick="testConnection()">Datenbank testen</button>
-        <button class="secondarybtn" onclick="loadAllData()">Jetzt aktualisieren</button>
-
-        <hr>
-
-        <p style="margin:8px 0 4px;">Neue Kategorie</p>
-        <input id="newCategoryName" class="full" type="text" placeholder="z. B. Snacks" style="text-align:left;">
-        <button onclick="addCategory()">Kategorie hinzufügen</button>
-
-        <p style="margin:12px 0 4px;">Neue Unterkategorie</p>
-        <select id="adminCategorySelect" class="full"></select>
-        <input id="newSubcategoryName" class="full" type="text" placeholder="z. B. Wein" style="text-align:left;margin-top:8px;">
-        <button onclick="addSubcategory()">Unterkategorie hinzufügen</button>
-
-        <hr>
-
-        <button class="dangerbtn" onclick="resetBankTotal()">Kassenstand auf 0 setzen</button>
-        <div class="notice" id="adminNotice"></div>
-      </div>
+      
 
     </div>
   </div>
