@@ -77,6 +77,7 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
       <table id="cartTable"></table>
       <div class="total">Session Umsatz: $<span id="sessionTotal">0.00</span></div><div class="notice" id="salesNotice"></div>
       <button onclick="clearSession()">Session löschen</button>
+      <button onclick="addSessionToBank()">Umsatz übertragen</button>
     </div>
 
     <div class="panel">
@@ -90,8 +91,7 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
       <p class="bank-label">Aktuelles Saloon Geld</p>
       <div class="bank-display">$ <span id="bankDisplay">0.00</span></div>
       <input type="number" id="bank" onchange="saveBank()">
-      <p style="margin-top:15px;">Session zur Kasse addieren</p>
-      <button onclick="addSessionToBank()">Umsatz übertragen</button>
+      
 
       <hr>
       <h3 style="margin-top:0;">Artikel hinzufügen</h3>
