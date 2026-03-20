@@ -98,6 +98,14 @@ hr{border:1px solid #6a4a2a;margin:20px 0}
       <button onclick="addSessionToBank()">Umsatz übertragen</button>
     </div>
 
+    <div class="panel wide-panel">
+      <h2>Verkaufsübersicht</h2>
+      <div class="table-scroll">
+        <table id="cashSalesOverviewTable"></table>
+      </div>
+      <div class="notice">Gesamtumsatz und Gewinn pro Mitarbeiter direkt unter den Verkäufen.</div>
+    </div>
+
     <div class="panel">
       <h2>Lagerbestand</h2>
       <table id="stockTable"></table>
@@ -1177,8 +1185,10 @@ function renderEmployeeSales(){
 
 
 function renderSalesOverview(){
-  const table = byId("salesOverviewTable");
-  if (!table) return;
+  const tables = ["salesOverviewTable", "cashSalesOverviewTable"]
+    .map(id => byId(id))
+    .filter(Boolean);
+  if (!tables.length) return;
 
   const byEmployee = {};
 
@@ -1210,37 +1220,39 @@ function renderSalesOverview(){
   const totalSales = Object.values(byEmployee).reduce((s,e)=>s+e.sales,0);
   const totalProfit = Object.values(byEmployee).reduce((s,e)=>s+e.profit,0);
 
-  table.innerHTML = `
-    <tr>
-      <th>Mitarbeiter</th>
-      <th>Umsatz</th>
-      <th>Gewinn</th>
-      <th>Buchungen</th>
-    </tr>
-  `;
+  tables.forEach(table => {
+    table.innerHTML = `
+      <tr>
+        <th>Mitarbeiter</th>
+        <th>Umsatz</th>
+        <th>Gewinn</th>
+        <th>Buchungen</th>
+      </tr>
+    `;
 
-  Object.values(byEmployee)
-    .sort((a,b)=>b.sales-a.sales)
-    .forEach(entry=>{
-      const row=document.createElement("tr");
-      row.innerHTML=`
-        <td>${entry.name}</td>
-        <td>$${money(entry.sales)}</td>
-        <td>$${money(entry.profit)}</td>
-        <td>${entry.bookings}</td>
-      `;
-      table.appendChild(row);
-    });
+    Object.values(byEmployee)
+      .sort((a,b)=>b.sales-a.sales)
+      .forEach(entry=>{
+        const row=document.createElement("tr");
+        row.innerHTML=`
+          <td>${entry.name}</td>
+          <td>$${money(entry.sales)}</td>
+          <td>$${money(entry.profit)}</td>
+          <td>${entry.bookings}</td>
+        `;
+        table.appendChild(row);
+      });
 
-  const totalRow=document.createElement("tr");
-  totalRow.style.fontWeight="bold";
-  totalRow.innerHTML=`
-    <td>GESAMT</td>
-    <td>$${money(totalSales)}</td>
-    <td>$${money(totalProfit)}</td>
-    <td>-</td>
-  `;
-  table.appendChild(totalRow);
+    const totalRow=document.createElement("tr");
+    totalRow.style.fontWeight="bold";
+    totalRow.innerHTML=`
+      <td>GESAMT</td>
+      <td>$${money(totalSales)}</td>
+      <td>$${money(totalProfit)}</td>
+      <td>-</td>
+    `;
+    table.appendChild(totalRow);
+  });
 }
 
 function renderSummary(){
