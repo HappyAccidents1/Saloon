@@ -210,9 +210,9 @@ label,p.form-label{display:block;margin:10px 0 6px;font-size:13px;font-weight:70
 </head>
 <body>
 <div class="topbar">
-<div><h1>🤠 Saloon Management System</h1><p class="muted" style="margin:6px 0 0;">Kasse, Lager, Mitarbeiter und Einkauf in einer Oberfläche.</p><span style="color: green; font-weight: bold; margin-left: 15px;">Kassenstand: 0,00 €</span></div>
+<div><h1>🤠 Saloon Management System</h1><p class="muted" style="margin:6px 0 0;">Kasse, Lager, Mitarbeiter und Einkauf in einer Oberfläche.</p></div>
 <div class="top-actions">
-<div class="info-box">Eingeloggt: <strong id="activeUserBadge">Niemand</strong></div>
+<div class="info-box">Eingeloggt: <strong id="activeUserBadge">Niemand</strong></div><div style="color:#2ecc71;font-weight:bold;">Kassenstand: $ <span id="bankDisplayTop">0.00</span></div>
 <button class="topbtn" id="employeePageBtn" onclick="showPage('employee')">Mitarbeiter Login</button>
 <button class="secondarybtn" id="cashPageBtn" onclick="showPage('cash')" style="display:none;">Zurück zur Kasse</button>
 </div>
@@ -709,6 +709,7 @@ async function loadAllData(){
 
   byId("bank").value = bank;
   const bd = byId("bankDisplay"); if (bd) bd.textContent = money(bank);
+  const top = byId("bankDisplayTop"); if (top) top.textContent = money(bank);
   render();
 }
 window.loadAllData = loadAllData;
@@ -724,6 +725,7 @@ async function saveBank(){
   try {
     bank = Number(byId("bank").value || 0);
     const bd = byId("bankDisplay"); if (bd) bd.textContent = money(bank);
+  const top = byId("bankDisplayTop"); if (top) top.textContent = money(bank);
     await upsertSetting("bank_total", { amount: bank });
     showNotice("Kassenstand gespeichert.");
   } catch (e) {
@@ -888,6 +890,7 @@ async function addSessionToBank(){
   const total = entries.reduce((sum, e) => sum + e.qty * e.sale_price, 0);
   bank += total;
   const bd = byId("bankDisplay"); if (bd) bd.textContent = money(bank);
+  const top = byId("bankDisplayTop"); if (top) top.textContent = money(bank);
   await upsertSetting("bank_total", { amount: bank });
 
   cart = {};
@@ -1071,6 +1074,7 @@ async function submitPurchaseOrder(){
   byId("bank").value = money(bank);
   const bd = byId("bankDisplay");
   if (bd) bd.textContent = money(bank);
+  const top = byId("bankDisplayTop"); if (top) top.textContent = money(bank);
   await upsertSetting("bank_total", { amount: bank });
   await savePurchaseHistory();
 
