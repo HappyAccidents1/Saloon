@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Saloon ERP – Supabase</title>
 <style>
 :root{
@@ -209,196 +210,162 @@ label,p.form-label{display:block;margin:10px 0 6px;font-size:13px;font-weight:70
 </head>
 <body>
 <div class="topbar">
-  <div><h1>🤠 Saloon Management System</h1><p class="muted" style="margin:6px 0 0;">Kasse, Lager, Mitarbeiter und Einkauf in einer Oberfläche.</p></div>
-  <div class="top-actions">
-    <div class="info-box">Eingeloggt: <strong id="activeUserBadge">Niemand</strong></div>
-    <button class="topbtn" id="employeePageBtn" onclick="showPage('employee')">Mitarbeiter Login</button>
-    <button class="secondarybtn" id="cashPageBtn" onclick="showPage('cash')" style="display:none;">Zurück zur Kasse</button>
-  </div>
+<div><h1>🤠 Saloon Management System</h1><p class="muted" style="margin:6px 0 0;">Kasse, Lager, Mitarbeiter und Einkauf in einer Oberfläche.</p><span style="color: green; font-weight: bold; margin-left: 15px;">Kassenstand: 0,00 €</span></div>
+<div class="top-actions">
+<div class="info-box">Eingeloggt: <strong id="activeUserBadge">Niemand</strong></div>
+<button class="topbtn" id="employeePageBtn" onclick="showPage('employee')">Mitarbeiter Login</button>
+<button class="secondarybtn" id="cashPageBtn" onclick="showPage('cash')" style="display:none;">Zurück zur Kasse</button>
 </div>
-
-<div id="cashPage" class="page active">
-  <div class="container">
-    <div class="panel">
-      <h2>Artikelverkauf</h2><p class="muted">Produkte nach Kategorie, direkt antippbar für die aktuelle Session.</p>
-      <div id="itemsList"></div>
-      <div class="notice" id="stockNotice"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Aktuelle Session</h2><p class="muted">Hier sammelst du Verkäufe, bevor du sie endgültig buchst.</p>
-      <table id="cartTable"></table>
-      <div class="total">Session Umsatz: $<span id="sessionTotal">0.00</span></div><div class="notice" id="salesNotice"></div>
-      <button onclick="clearSession()">Session leeren</button>
-      <button onclick="addSessionToBank()">Session buchen</button>
-    </div>
-
-    <div class="panel wide-panel">
-      <h2>Team-Umsatz</h2><p class="muted">Direkter Überblick über Umsatz, Gewinn und Buchungen pro Mitarbeiter.</p>
-      <div class="table-scroll">
-        <table id="cashSalesOverviewTable"></table>
-      </div>
-      <div class="notice">Gesamtumsatz und Gewinn pro Mitarbeiter direkt unter den Verkäufen.</div>
-    </div>
-
-    <div class="panel wide-panel">
-      <h2>Verkaufshistorie</h2><p class="muted">Alle bereits gebuchten Verkäufe in zeitlicher Reihenfolge.</p>
-      <table id="salesHistoryTable"></table>
-      <button class="dangerbtn" onclick="clearSalesHistory()" style="margin-top:12px;">Historie ausblenden</button>
-      <div class="notice" id="salesHistoryNotice">Alle Umsätze mit Datum, Menge und Gesamtbetrag.</div>
-    </div>
-
-
-    <div class="panel">
-      <h2>Lagerbestand</h2><p class="muted">Bestände manuell korrigieren und sofort speichern.</p>
-      <table id="stockTable"></table>
-      <div class="notice">Lager wird bei „Session buchen“ zentral in der Datenbank reduziert.</div>
-    </div>
-
-    <div class="panel">
-      <h2>Kassenbereich</h2><p class="muted">Kassenstand verwalten und neue Artikel anlegen.</p>
-      <p class="bank-label">Aktuelles Saloon Geld</p>
-      <div class="bank-display">$ <span id="bankDisplay">0.00</span></div>
-      <input type="number" id="bank" onchange="saveBank()">
-      
-
-      <hr>
-      <h3 style="margin-top:0;">Artikel hinzufügen</h3>
-      <p class="form-label">Name</p>
-      <input id="newName" class="full" type="text" style="text-align:left;">
-      <p class="form-label">Verkaufspreis</p>
-      <input id="newPrice" type="number" min="0" step="0.01">
-      <p class="form-label">Einkaufspreis</p>
-      <input id="newCost" type="number" min="0" step="0.01">
-      <p class="form-label">Startbestand</p>
-      <input id="newStock" type="number" min="0" step="1">
-      <p class="form-label">Kategorie</p>
-      <select id="newCategory" class="full">
-        <option value="Getränke">Getränke</option>
-        <option value="Essen">Essen</option>
-      </select>
-      <p class="form-label">Unterkategorie</p>
-      <select id="newSubcategory" class="full">
-        <option value="Alkoholisch">Alkoholisch</option>
-        <option value="Nicht alkoholisch">Nicht alkoholisch</option>
-        <option value="">Keine</option>
-      </select>
-      <button onclick="addNewProduct()" style="margin-top:12px;">Artikel speichern</button>
-      <div class="notice" id="productNotice"></div>
-    </div>
-  </div>
 </div>
-
-<div id="employeePage" class="page">
-  <div class="employee-wrap">
-    <div class="employee-grid">
+<div class="page active" id="cashPage">
+<div class="container">
 <div class="panel">
-        <h2>Stammdaten</h2><p class="muted">Kategorien pflegen, Daten laden und die Verbindung prüfen.</p>
-
-        <button class="secondarybtn" onclick="testConnection()">Datenbank testen</button>
-        <button class="secondarybtn" onclick="loadAllData()">Daten neu laden</button>
-
-        <hr>
-
-        <p class="form-label">Neue Kategorie</p>
-        <input id="newCategoryName" class="full" type="text" placeholder="z. B. Snacks" style="text-align:left;">
-        <button onclick="addCategory()">Kategorie hinzufügen</button>
-
-        <p class="form-label">Neue Unterkategorie</p>
-        <select id="adminCategorySelect" class="full"></select>
-        <input id="newSubcategoryName" class="full" type="text" placeholder="z. B. Wein" style="text-align:left;margin-top:8px;">
-        <button onclick="addSubcategory()">Unterkategorie hinzufügen</button>
-
-        <hr>
-
-        <button class="dangerbtn" onclick="resetBankTotal()">Kassenstand auf 0 setzen</button>
-        <div class="notice" id="adminNotice"></div>
-      </div>
-
-      <div class="panel">
-        <h2>Einträge löschen</h2><p class="muted">Einzelne Datensätze gezielt auswählen und entfernen.</p>
-
-        <p class="form-label">Bereich</p>
-        <select id="deleteTypeSelect" class="full" onchange="renderDeleteOptions()">
-          <option value="products">Artikel</option>
-          <option value="employees">Mitarbeiter</option>
-          <option value="sales">Verkäufe</option>
-          <option value="categories">Kategorien</option>
-        </select>
-
-        <p class="form-label">Eintrag auswählen</p>
-        <select id="deleteItemSelect" class="full"></select>
-
-        <button class="dangerbtn" onclick="deleteSelectedRecord()" style="margin-top:12px;">Ausgewählten Eintrag löschen</button>
-
-        <div class="notice" id="deleteNotice"></div>
-      </div>
-
-      <div class="panel">
-        <h2>Mitarbeiter</h2><p class="muted">Benutzer anlegen, löschen und den aktiven Mitarbeiter setzen.</p>
-        <p class="form-label">Neuen Mitarbeiter anlegen</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input id="newUserName" type="text" placeholder="Name eingeben" style="flex:1;min-width:180px;text-align:left;">
-          <button onclick="addUser()" class="topbtn">Hinzufügen</button>
-          <button onclick="deleteUser()" class="secondarybtn">Löschen</button>
-        </div>
-
-        <div class="section-gap">
-          <p class="form-label">Mitarbeiter auswählen</p>
-          <select id="activeUserSelect" class="full"></select>
-          <button onclick="setActiveUser()" style="margin-top:10px;">Einloggen</button>
-        </div>
-
-        <div class="section-gap info-box">
-          Aktiver Mitarbeiter: <strong id="activeUserLabel">Niemand</strong>
-        </div>
-        <div class="notice" id="userNotice"></div>
-      </div>
-
-      <div class="panel wide-panel">
-        <h2>Umsatzübersicht</h2><p class="muted">Gesamte Leistung des Teams auf einen Blick.</p>
-        <table id="salesOverviewTable"></table>
-        <button onclick="resetSales()" class="dangerbtn" style="margin-top:12px;">Alle Umsätze löschen</button>
-        <div class="notice">Gesamtumsatz und Umsatz pro Mitarbeiter.</div>
-      </div>
-
-      <div class="panel">
-        <h2>Wareneinkauf</h2><p class="muted">Artikel nachbestellen und direkt gegen die Kasse buchen.</p>
-        <p class="form-label">Artikel auswählen</p>
-        <select id="purchaseProductSelect" class="full"></select>
-        <p class="form-label">Menge</p>
-        <input id="purchaseQtyInput" type="number" min="1" step="1" value="1">
-        <button onclick="addPurchaseItem()" style="margin-top:12px;">Zum Einkauf hinzufügen</button>
-
-        <table id="purchaseTable"></table>
-        <div class="total">Einkauf gesamt: $<span id="purchaseTotal">0.00</span></div>
-        <button onclick="clearPurchaseCart()">Einkaufsliste löschen</button>
-        <button onclick="submitPurchaseOrder()">Einkauf buchen & von Kasse abziehen</button>
-        <div class="notice" id="purchaseNotice"></div>
-      </div>
-
-
-      <div class="panel wide-panel">
-        <h2>Einkaufshistorie</h2><p class="muted">Alle gebuchten Einkäufe inklusive Datum, Menge und Kosten.</p>
-        <table id="purchaseHistoryTable"></table>
-        <button class="dangerbtn" onclick="clearPurchaseHistory()" style="margin-top:12px;">Einkaufshistorie löschen</button>
-        <div class="notice" id="purchaseHistoryNotice">Alle gebuchten Wareneinkäufe mit Datum, Menge und Kosten.</div>
-      </div>
-
-      <div class="panel full-width-panel">
-        <h2>Artikel bearbeiten</h2><p class="muted">Preise und Namen zentral anpassen.</p>
-        <div class="table-scroll">
-          <table id="editProductsTable"></table>
-        </div>
-        <div class="notice">Name, Verkauf und Einkauf ändern und mit einem Klick speichern.</div>
-      </div>
-    
-      
-
-    </div>
-  </div>
+<h2>Artikelverkauf</h2><p class="muted">Produkte nach Kategorie, direkt antippbar für die aktuelle Session.</p>
+<div id="itemsList"></div>
+<div class="notice" id="stockNotice"></div>
 </div>
-
+<div class="panel">
+<h2>Aktuelle Session</h2><p class="muted">Hier sammelst du Verkäufe, bevor du sie endgültig buchst.</p>
+<table id="cartTable"></table>
+<div class="total">Session Umsatz: $<span id="sessionTotal">0.00</span></div><div class="notice" id="salesNotice"></div>
+<button onclick="clearSession()">Session leeren</button>
+<button onclick="addSessionToBank()">Session buchen</button>
+</div>
+<div class="panel wide-panel">
+<h2>Team-Umsatz</h2><p class="muted">Direkter Überblick über Umsatz, Gewinn und Buchungen pro Mitarbeiter.</p>
+<div class="table-scroll">
+<table id="cashSalesOverviewTable"></table>
+</div>
+<div class="notice">Gesamtumsatz und Gewinn pro Mitarbeiter direkt unter den Verkäufen.</div>
+</div>
+<div class="panel wide-panel">
+<h2>Verkaufshistorie</h2><p class="muted">Alle bereits gebuchten Verkäufe in zeitlicher Reihenfolge.</p>
+<table id="salesHistoryTable"></table>
+<button class="dangerbtn" onclick="clearSalesHistory()" style="margin-top:12px;">Historie ausblenden</button>
+<div class="notice" id="salesHistoryNotice">Alle Umsätze mit Datum, Menge und Gesamtbetrag.</div>
+</div>
+<div class="panel">
+<h2>Lagerbestand</h2><p class="muted">Bestände manuell korrigieren und sofort speichern.</p>
+<table id="stockTable"></table>
+<div class="notice">Lager wird bei „Session buchen“ zentral in der Datenbank reduziert.</div>
+</div>
+<div class="panel">
+<h2>Kassenbereich</h2><p class="muted">Kassenstand verwalten und neue Artikel anlegen.</p>
+<p class="bank-label">Aktuelles Saloon Geld</p>
+<div class="bank-display">$ <span id="bankDisplay">0.00</span></div>
+<input id="bank" onchange="saveBank()" type="number"/>
+<hr/>
+<h3 style="margin-top:0;">Artikel hinzufügen</h3>
+<p class="form-label">Name</p>
+<input class="full" id="newName" style="text-align:left;" type="text"/>
+<p class="form-label">Verkaufspreis</p>
+<input id="newPrice" min="0" step="0.01" type="number"/>
+<p class="form-label">Einkaufspreis</p>
+<input id="newCost" min="0" step="0.01" type="number"/>
+<p class="form-label">Startbestand</p>
+<input id="newStock" min="0" step="1" type="number"/>
+<p class="form-label">Kategorie</p>
+<select class="full" id="newCategory">
+<option value="Getränke">Getränke</option>
+<option value="Essen">Essen</option>
+</select>
+<p class="form-label">Unterkategorie</p>
+<select class="full" id="newSubcategory">
+<option value="Alkoholisch">Alkoholisch</option>
+<option value="Nicht alkoholisch">Nicht alkoholisch</option>
+<option value="">Keine</option>
+</select>
+<button onclick="addNewProduct()" style="margin-top:12px;">Artikel speichern</button>
+<div class="notice" id="productNotice"></div>
+</div>
+</div>
+</div>
+<div class="page" id="employeePage">
+<div class="employee-wrap">
+<div class="employee-grid">
+<div class="panel">
+<h2>Stammdaten</h2><p class="muted">Kategorien pflegen, Daten laden und die Verbindung prüfen.</p>
+<button class="secondarybtn" onclick="testConnection()">Datenbank testen</button>
+<button class="secondarybtn" onclick="loadAllData()">Daten neu laden</button>
+<hr/>
+<p class="form-label">Neue Kategorie</p>
+<input class="full" id="newCategoryName" placeholder="z. B. Snacks" style="text-align:left;" type="text"/>
+<button onclick="addCategory()">Kategorie hinzufügen</button>
+<p class="form-label">Neue Unterkategorie</p>
+<select class="full" id="adminCategorySelect"></select>
+<input class="full" id="newSubcategoryName" placeholder="z. B. Wein" style="text-align:left;margin-top:8px;" type="text"/>
+<button onclick="addSubcategory()">Unterkategorie hinzufügen</button>
+<hr/>
+<button class="dangerbtn" onclick="resetBankTotal()">Kassenstand auf 0 setzen</button>
+<div class="notice" id="adminNotice"></div>
+</div>
+<div class="panel">
+<h2>Einträge löschen</h2><p class="muted">Einzelne Datensätze gezielt auswählen und entfernen.</p>
+<p class="form-label">Bereich</p>
+<select class="full" id="deleteTypeSelect" onchange="renderDeleteOptions()">
+<option value="products">Artikel</option>
+<option value="employees">Mitarbeiter</option>
+<option value="sales">Verkäufe</option>
+<option value="categories">Kategorien</option>
+</select>
+<p class="form-label">Eintrag auswählen</p>
+<select class="full" id="deleteItemSelect"></select>
+<button class="dangerbtn" onclick="deleteSelectedRecord()" style="margin-top:12px;">Ausgewählten Eintrag löschen</button>
+<div class="notice" id="deleteNotice"></div>
+</div>
+<div class="panel">
+<h2>Mitarbeiter</h2><p class="muted">Benutzer anlegen, löschen und den aktiven Mitarbeiter setzen.</p>
+<p class="form-label">Neuen Mitarbeiter anlegen</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<input id="newUserName" placeholder="Name eingeben" style="flex:1;min-width:180px;text-align:left;" type="text"/>
+<button class="topbtn" onclick="addUser()">Hinzufügen</button>
+<button class="secondarybtn" onclick="deleteUser()">Löschen</button>
+</div>
+<div class="section-gap">
+<p class="form-label">Mitarbeiter auswählen</p>
+<select class="full" id="activeUserSelect"></select>
+<button onclick="setActiveUser()" style="margin-top:10px;">Einloggen</button>
+</div>
+<div class="section-gap info-box">
+          Aktiver Mitarbeiter: <strong id="activeUserLabel">Niemand</strong>
+</div>
+<div class="notice" id="userNotice"></div>
+</div>
+<div class="panel wide-panel">
+<h2>Umsatzübersicht</h2><p class="muted">Gesamte Leistung des Teams auf einen Blick.</p>
+<table id="salesOverviewTable"></table>
+<button class="dangerbtn" onclick="resetSales()" style="margin-top:12px;">Alle Umsätze löschen</button>
+<div class="notice">Gesamtumsatz und Umsatz pro Mitarbeiter.</div>
+</div>
+<div class="panel">
+<h2>Wareneinkauf</h2><p class="muted">Artikel nachbestellen und direkt gegen die Kasse buchen.</p>
+<p class="form-label">Artikel auswählen</p>
+<select class="full" id="purchaseProductSelect"></select>
+<p class="form-label">Menge</p>
+<input id="purchaseQtyInput" min="1" step="1" type="number" value="1"/>
+<button onclick="addPurchaseItem()" style="margin-top:12px;">Zum Einkauf hinzufügen</button>
+<table id="purchaseTable"></table>
+<div class="total">Einkauf gesamt: $<span id="purchaseTotal">0.00</span></div>
+<button onclick="clearPurchaseCart()">Einkaufsliste löschen</button>
+<button onclick="submitPurchaseOrder()">Einkauf buchen &amp; von Kasse abziehen</button>
+<div class="notice" id="purchaseNotice"></div>
+</div>
+<div class="panel wide-panel">
+<h2>Einkaufshistorie</h2><p class="muted">Alle gebuchten Einkäufe inklusive Datum, Menge und Kosten.</p>
+<table id="purchaseHistoryTable"></table>
+<button class="dangerbtn" onclick="clearPurchaseHistory()" style="margin-top:12px;">Einkaufshistorie löschen</button>
+<div class="notice" id="purchaseHistoryNotice">Alle gebuchten Wareneinkäufe mit Datum, Menge und Kosten.</div>
+</div>
+<div class="panel full-width-panel">
+<h2>Artikel bearbeiten</h2><p class="muted">Preise und Namen zentral anpassen.</p>
+<div class="table-scroll">
+<table id="editProductsTable"></table>
+</div>
+<div class="notice">Name, Verkauf und Einkauf ändern und mit einem Klick speichern.</div>
+</div>
+</div>
+</div>
+</div>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
