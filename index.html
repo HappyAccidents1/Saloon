@@ -389,13 +389,7 @@ const byId = id => document.getElementById(id);
 const money = n => Number(n || 0).toFixed(2);
 
 byId("newCategory").addEventListener("change", function(){
-  const sub = byId("newSubcategory");
-  if (this.value === "Essen") {
-    sub.value = "";
-    sub.disabled = true;
-  } else {
-    sub.disabled = false;
-  }
+  fillCategorySelectors();
 });
 
 function showPage(page){
@@ -510,13 +504,8 @@ function fillCategorySelectors(){
       if (sub === selectedSub) opt.selected = true;
       cashSub.appendChild(opt);
     });
-    if (cashCategory.value === "Essen") {
-      cashSub.value = "";
-      cashSub.disabled = true;
-    } else {
-      cashSub.disabled = false;
-      if (!cashSub.value && cashSub.options.length) cashSub.value = cashSub.options[0].value;
-    }
+    cashSub.disabled = false;
+    if (!cashSub.value && cashSub.options.length) cashSub.value = cashSub.options[0].value;
   }
 }
 
