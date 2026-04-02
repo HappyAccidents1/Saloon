@@ -776,7 +776,7 @@ async function addNewProduct(){
   const cost_price = Number(byId("newCost").value || 0);
   const stock = Number(byId("newStock").value || 0);
   const category = byId("newCategory").value;
-  const subcategory = category === "Essen" ? "" : byId("newSubcategory").value;
+  const subcategory = byId("newSubcategory").value;
 
   if (!name) return showProductNotice("Bitte einen Artikelnamen eingeben.");
   if (products.some(p => p.name.toLowerCase() === name.toLowerCase())) {
